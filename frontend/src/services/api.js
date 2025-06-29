@@ -59,7 +59,12 @@ export const userService = {
     return await api.get('/users/me');
   },
   updateProfile: async (userData) => {
-    return await api.put('/users/me', userData);
+    const response = await api.put('/users/me', userData);
+    if (response.data.user) {
+      // Update the user in local storage with new data
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    return response.data;
   },
 };
 

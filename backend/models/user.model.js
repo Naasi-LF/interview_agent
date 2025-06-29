@@ -55,6 +55,26 @@ userSchema.pre('save', async function(next) {
   }
 });
 
+// Pre-update hook to hash password when updating
+userSchema.pre('findOneAndUpdate', async function(next) {
+  const update = this.getUpdate();
+  
+  // Only hash the password if it's being updated
+  if (update.$set && update.$set.password) {
+    try {
+      // Generate salt
+      const salt = await bcrypt.genSalt(10);
+      // Hash password with salt
+      update.$set.password = await bcrypt.hash(update.$set.password, salt);
+      next();
+    } catch (error) {
+      next(error);
+    }
+  } else {
+    next();
+  }
+});
+
 // Method to compare password for login
 userSchema.methods.comparePassword = async function(candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);

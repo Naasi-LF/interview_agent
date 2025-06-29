@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { authService } from '../services/api';
+import { authService, userService } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -52,6 +52,22 @@ export const AuthProvider = ({ children }) => {
     authService.logout();
     setCurrentUser(null);
   };
+  
+  // Update user profile
+  const updateUser = async (userData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await userService.updateProfile(userData);
+      setCurrentUser(data.user);
+      return data;
+    } catch (error) {
+      setError(error.response?.data?.message || 'Profile update failed');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const value = {
     currentUser,
@@ -59,7 +75,8 @@ export const AuthProvider = ({ children }) => {
     error,
     register,
     login,
-    logout
+    logout,
+    updateUser
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
