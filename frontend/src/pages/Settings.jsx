@@ -169,7 +169,7 @@ const Settings = () => {
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          <h2 className="text-xl font-medium">settings</h2>
+          <h2 className="text-xl font-fangyuan">设置</h2>
         </div>
         
         <div className="space-y-6">
@@ -177,21 +177,21 @@ const Settings = () => {
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
-            <span>Edit profile</span>
+            <span className="font-kaiti">编辑资料</span>
           </div>
           
           <div className="flex items-center text-gray-500 cursor-pointer" onClick={handleLogout}>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span>Logout</span>
+            <span className="font-kaiti">退出登录</span>
           </div>
         </div>
       </div>
       
       {/* Main content */}
       <div className="flex-1 p-8">
-        <h2 className="text-3xl font-bold mb-8">Edit profile</h2>
+        <h2 className="text-3xl font-heiti mb-8">编辑资料</h2>
         
         {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
         {success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">{success}</div>}
@@ -237,8 +237,8 @@ const Settings = () => {
 
           {/* Username */}
           <div className="mb-6">
-            <label className="block text-gray-700 mb-2" htmlFor="username">
-              User Name
+            <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="username">
+              用户名
             </label>
             <input
               className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500"
@@ -252,8 +252,8 @@ const Settings = () => {
 
           {/* Nickname */}
           <div className="mb-6">
-            <label className="block text-gray-700 mb-2" htmlFor="nickname">
-              Nick Name
+            <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="nickname">
+              昵称
             </label>
             <input
               className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500"
@@ -267,8 +267,8 @@ const Settings = () => {
 
           {/* Bio */}
           <div className="mb-6">
-            <label className="block text-gray-700 mb-2" htmlFor="bio">
-              Bio
+            <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="bio">
+              个人简介
             </label>
             <textarea
               className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500 h-32"
@@ -281,14 +281,14 @@ const Settings = () => {
 
           {/* Password */}
           <div className="mb-6">
-            <label className="block text-gray-700 mb-2" htmlFor="password">
-              Password
+            <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="password">
+              密码
             </label>
             <input
               className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500"
               id="password"
               type="password"
-              placeholder="Leave blank to keep current password"
+              placeholder="留空以保持当前密码"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             />
@@ -296,14 +296,14 @@ const Settings = () => {
 
           {/* Confirm Password */}
           <div className="mb-8">
-            <label className="block text-gray-700 mb-2" htmlFor="confirmPassword">
-              Confirm Password
+            <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="confirmPassword">
+              确认密码
             </label>
             <input
               className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500"
               id="confirmPassword"
               type="password"
-              placeholder="Confirm your new password"
+              placeholder="确认您的新密码"
               value={formData.confirmPassword}
               onChange={(e) =>
                 setFormData({ ...formData, confirmPassword: e.target.value })
@@ -318,14 +318,14 @@ const Settings = () => {
               className="border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-6 rounded focus:outline-none"
               onClick={() => navigate('/dashboard')}
             >
-              Cancel
+              取消
             </button>
             <button
               type="submit"
               className="bg-black hover:bg-gray-800 text-white font-medium py-2 px-6 rounded focus:outline-none"
               disabled={loading}
             >
-              {loading ? 'Saving...' : 'Save'}
+              {loading ? '保存中...' : '保存'}
             </button>
           </div>
         </form>

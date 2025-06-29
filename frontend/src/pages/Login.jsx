@@ -22,7 +22,7 @@ const Login = () => {
     e.preventDefault();
     
     if (!username || !password) {
-      setError('Please enter both username and password');
+      setError('请输入用户名和密码');
       return;
     }
 
@@ -32,7 +32,7 @@ const Login = () => {
       await login(username, password);
       navigate('/dashboard');
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to login. Please check your credentials.');
+      setError(error.response?.data?.message || '登录失败，请检查您的凭据。');
     } finally {
       setLoading(false);
     }
@@ -47,9 +47,9 @@ const Login = () => {
             <CardContent className="p-8">
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-2xl font-light font-['Poppins']">Welcome!</h2>
-                  <h1 className="text-3xl font-medium font-['Poppins'] mt-4">Sign in to</h1>
-                  <p className="text-base font-normal font-['Poppins'] mt-4">AI Interview Platform</p>
+                  <h2 className="text-2xl font-fangyuan">欢迎!</h2>
+                  <h1 className="text-3xl font-heiti mt-4">登录到</h1>
+                  <p className="text-base font-kaiti mt-4">AI 面试平台</p>
                 </div>
 
                 {error && (
@@ -60,12 +60,12 @@ const Login = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-8">
                   <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
+                    <Label htmlFor="username" className="font-fangyuan">用户名</Label>
                     <div className="relative">
                       <Input
                         id="username"
                         type="text"
-                        placeholder="Enter your username"
+                        placeholder="请输入您的用户名"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         className="h-14 pl-6"
@@ -74,12 +74,12 @@ const Login = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password" className="font-fangyuan">密码</Label>
                     <div className="relative">
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
+                        placeholder="请输入您的密码"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="h-14 pl-6 pr-12"
@@ -108,12 +108,12 @@ const Login = () => {
                         onChange={() => setRememberMe(!rememberMe)}
                         className="w-3.5 h-3.5 border border-black"
                       />
-                      <label htmlFor="remember" className="text-xs font-light font-['Poppins']">
-                        Remember me
+                      <label htmlFor="remember" className="text-xs font-kaiti">
+                        记住我
                       </label>
                     </div>
-                    <Link to="/forgot-password" className="text-neutral-600 text-xs font-light font-['Poppins']">
-                      Forgot Password?
+                    <Link to="/forgot-password" className="text-neutral-600 text-xs font-kaiti">
+                      忘记密码?
                     </Link>
                   </div>
 
@@ -122,15 +122,15 @@ const Login = () => {
                     disabled={loading}
                     className="w-full h-14 bg-black text-white rounded-md"
                   >
-                    {loading ? 'Logging in...' : 'Login'}
+                    {loading ? '登录中...' : '登录'}
                   </Button>
 
                   <div className="text-center">
-                    <span className="text-zinc-500 text-base font-light font-['Poppins']">
-                      Don't have an Account?{' '}
+                    <span className="text-zinc-500 text-base font-kaiti">
+                      没有账号?{' '}
                     </span>
-                    <Link to="/register" className="text-black text-base font-semibold font-['Poppins']">
-                      Register
+                    <Link to="/register" className="text-black text-base font-heiti">
+                      注册
                     </Link>
                   </div>
                 </form>
@@ -145,7 +145,7 @@ const Login = () => {
             <div className="w-[827px] h-[650px] relative overflow-hidden">
               <img 
                 src="/src/assets/images/back.svg" 
-                alt="Login illustration" 
+                alt="登录插图" 
                 className="w-full h-full object-cover"
               />
             </div>

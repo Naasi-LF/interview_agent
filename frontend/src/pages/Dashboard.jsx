@@ -75,11 +75,11 @@ const Dashboard = () => {
       {/* Main content */}
       <div className="flex-1 p-10">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold mb-10">Dashboard</h1>
+          <h1 className="text-4xl font-heiti mb-10">仪表盘</h1>
           
           {/* Empty content area - placeholder for future implementation */}
           <div className="bg-gray-50 rounded-lg p-10 flex items-center justify-center h-[600px]">
-            <p className="text-xl text-gray-500">Dashboard content will be implemented in future updates</p>
+            <p className="text-xl text-gray-500 font-kaiti">仪表盘内容将在未来更新中实现</p>
           </div>
         </div>
       </div>

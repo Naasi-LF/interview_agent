@@ -24,12 +24,12 @@ const Register = () => {
     e.preventDefault();
     
     if (!username || !nickname || !password) {
-      setError('Please fill in all required fields');
+      setError('请填写所有必填字段');
       return;
     }
     
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError('密码不匹配');
       return;
     }
 
@@ -39,7 +39,7 @@ const Register = () => {
       await register(username, password, nickname);
       navigate('/dashboard');
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to register. Please try again.');
+      setError(error.response?.data?.message || '注册失败。请重试。');
     } finally {
       setLoading(false);
     }
@@ -54,9 +54,9 @@ const Register = () => {
             <CardContent className="p-8">
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-2xl font-light font-['Poppins']">Welcome!</h2>
-                  <h1 className="text-3xl font-medium font-['Poppins'] mt-4">Sign up to</h1>
-                  <p className="text-base font-normal font-['Poppins'] mt-4">AI Interview Platform</p>
+                  <h2 className="text-2xl font-fangyuan">欢迎!</h2>
+                  <h1 className="text-3xl font-heiti mt-4">注册到</h1>
+                  <p className="text-base font-kaiti mt-4">AI 面试平台</p>
                 </div>
 
                 {error && (
@@ -67,12 +67,12 @@ const Register = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="space-y-2">
-                    <Label htmlFor="username">Username <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="username" className="font-fangyuan">用户名 <span className="text-red-500">*</span></Label>
                     <div className="relative">
                       <Input
                         id="username"
                         type="text"
-                        placeholder="Enter your username"
+                        placeholder="请输入您的用户名"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         className="h-14 pl-6"
@@ -82,12 +82,12 @@ const Register = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="nickname">Nickname <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="nickname" className="font-fangyuan">昵称 <span className="text-red-500">*</span></Label>
                     <div className="relative">
                       <Input
                         id="nickname"
                         type="text"
-                        placeholder="Enter your nickname"
+                        placeholder="请输入您的昵称"
                         value={nickname}
                         onChange={(e) => setNickname(e.target.value)}
                         className="h-14 pl-6"
@@ -97,12 +97,12 @@ const Register = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="password" className="font-fangyuan">密码 <span className="text-red-500">*</span></Label>
                     <div className="relative">
                       <Input
                         id="password"
                         type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
+                        placeholder="请输入您的密码"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         className="h-14 pl-6 pr-12"
@@ -124,12 +124,12 @@ const Register = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="confirmPassword" className="font-fangyuan">确认密码 <span className="text-red-500">*</span></Label>
                     <div className="relative">
                       <Input
                         id="confirmPassword"
                         type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm your password"
+                        placeholder="请确认您的密码"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         className="h-14 pl-6 pr-12"
@@ -155,15 +155,15 @@ const Register = () => {
                     disabled={loading}
                     className="w-full h-14 bg-black text-white rounded-md mt-4"
                   >
-                    {loading ? 'Registering...' : 'Register'}
+                    {loading ? '注册中...' : '注册'}
                   </Button>
 
                   <div className="text-center mt-4">
-                    <span className="text-zinc-500 text-base font-light font-['Poppins']">
-                      Already have an Account?{' '}
+                    <span className="text-zinc-500 text-base font-kaiti">
+                      已有账号?{' '}
                     </span>
-                    <Link to="/login" className="text-black text-base font-semibold font-['Poppins']">
-                      Login
+                    <Link to="/login" className="text-black text-base font-heiti">
+                      登录
                     </Link>
                   </div>
                 </form>
@@ -178,7 +178,7 @@ const Register = () => {
             <div className="w-[827px] h-[650px] relative overflow-hidden">
               <img 
                 src="/src/assets/images/back.svg" 
-                alt="Registration illustration" 
+                alt="注册插图" 
                 className="w-full h-full object-cover"
               />
             </div>

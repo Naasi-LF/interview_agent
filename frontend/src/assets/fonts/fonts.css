@@ -1,0 +1,35 @@
+@font-face {
+  font-family: 'AlimamaDongFangDaKai';
+  src: url('./AlimamaDongFangDaKai-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AlimamaFangYuanTi';
+  src: url('./AlimamaFangYuanTiVF-Thin.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AlimamaShuHeiTi';
+  src: url('./AlimamaShuHeiTi-Bold.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-kaiti {
+  font-family: 'AlimamaDongFangDaKai', serif;
+}
+
+.font-fangyuan {
+  font-family: 'AlimamaFangYuanTi', sans-serif;
+}
+
+.font-heiti {
+  font-family: 'AlimamaShuHeiTi', sans-serif;
+}
