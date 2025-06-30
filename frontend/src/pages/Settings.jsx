@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import settingsSvg from '../assets/images/settings.svg';
 
 const Settings = () => {
   const { currentUser, updateUser, logout } = useAuth();
@@ -130,146 +131,158 @@ const Settings = () => {
   };
   
   return (
-    <div className="w-full">
-      <h2 className="text-3xl font-heiti mb-6">设置</h2>
-      
-      {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
-      {success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">{success}</div>}
-      
-      <form onSubmit={handleSubmit} className="max-w-2xl">
-        {/* Avatar */}
-        <div className="mb-8 flex justify-center">
-          <div className="relative">
-            <div 
-              className="w-24 h-24 rounded-full overflow-hidden cursor-pointer relative bg-gray-200 flex items-center justify-center"
-              onClick={handleAvatarClick}
-            >
-              {previewAvatar ? (
-                <img 
-                  src={previewAvatar} 
-                  alt="User avatar" 
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    <div className="w-full flex gap-8">
+      {/* 左侧设置表单 */}
+      <div className="flex-1 max-w-2xl">
+        <h2 className="text-3xl font-heiti mb-6">设置</h2>
+        
+        {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
+        {success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">{success}</div>}
+        
+        <form onSubmit={handleSubmit}>
+          {/* Avatar */}
+          <div className="mb-8 flex justify-center">
+            <div className="relative">
+              <div 
+                className="w-24 h-24 rounded-full overflow-hidden cursor-pointer relative bg-gray-200 flex items-center justify-center"
+                onClick={handleAvatarClick}
+              >
+                {previewAvatar ? (
+                  <img 
+                    src={previewAvatar} 
+                    alt="User avatar" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                )}
+              </div>
+              <div className="absolute bottom-0 right-0 bg-black rounded-full p-1 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-              )}
+              </div>
+              <input 
+                type="file" 
+                id="avatar" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/*" 
+                onChange={handleFileChange}
+              />
             </div>
-            <div className="absolute bottom-0 right-0 bg-black rounded-full p-1 cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </div>
-            <input 
-              type="file" 
-              id="avatar" 
-              ref={fileInputRef} 
-              className="hidden" 
-              accept="image/*" 
-              onChange={handleFileChange}
+          </div>
+
+          {/* Username */}
+          <div className="mb-6">
+            <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="username">
+              用户名
+            </label>
+            <input
+              className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500"
+              id="username"
+              name="username"
+              type="text"
+              placeholder="Username"
+              value={formData.username}
+              onChange={handleChange}
             />
           </div>
-        </div>
 
-        {/* Username */}
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="username">
-            用户名
-          </label>
-          <input
-            className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500"
-            id="username"
-            name="username"
-            type="text"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-          />
-        </div>
+          {/* Nickname */}
+          <div className="mb-6">
+            <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="nickname">
+              昵称
+            </label>
+            <input
+              className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500"
+              id="nickname"
+              name="nickname"
+              type="text"
+              placeholder="Nickname"
+              value={formData.nickname}
+              onChange={handleChange}
+            />
+          </div>
 
-        {/* Nickname */}
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="nickname">
-            昵称
-          </label>
-          <input
-            className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500"
-            id="nickname"
-            name="nickname"
-            type="text"
-            placeholder="Nickname"
-            value={formData.nickname}
-            onChange={handleChange}
-          />
-        </div>
+          {/* Bio */}
+          <div className="mb-6">
+            <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="bio">
+              个人简介
+            </label>
+            <textarea
+              className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500 h-32"
+              id="bio"
+              name="bio"
+              placeholder="Tell us about yourself"
+              value={formData.bio || ''}
+              onChange={handleChange}
+            />
+          </div>
 
-        {/* Bio */}
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="bio">
-            个人简介
-          </label>
-          <textarea
-            className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500 h-32"
-            id="bio"
-            name="bio"
-            placeholder="Tell us about yourself"
-            value={formData.bio || ''}
-            onChange={handleChange}
-          />
-        </div>
+          {/* Password */}
+          <div className="mb-6">
+            <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="password">
+              密码
+            </label>
+            <input
+              className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500"
+              id="password"
+              name="password"
+              type="password"
+              placeholder="留空以保持当前密码"
+              value={formData.password}
+              onChange={handleChange}
+            />
+          </div>
 
-        {/* Password */}
-        <div className="mb-6">
-          <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="password">
-            密码
-          </label>
-          <input
-            className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500"
-            id="password"
-            name="password"
-            type="password"
-            placeholder="留空以保持当前密码"
-            value={formData.password}
-            onChange={handleChange}
-          />
-        </div>
+          {/* Confirm Password */}
+          <div className="mb-8">
+            <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="confirmPassword">
+              确认密码
+            </label>
+            <input
+              className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500"
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              placeholder="确认您的新密码"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+            />
+          </div>
 
-        {/* Confirm Password */}
-        <div className="mb-8">
-          <label className="block text-gray-700 mb-2 font-fangyuan" htmlFor="confirmPassword">
-            确认密码
-          </label>
-          <input
-            className="border border-gray-300 rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:border-gray-500"
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            placeholder="确认您的新密码"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-          />
-        </div>
+          {/* Buttons */}
+          <div className="flex justify-between">
+            <button
+              type="button"
+              className="border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-6 rounded focus:outline-none"
+              onClick={handleCancel}
+            >
+              取消
+            </button>
+            <button
+              type="submit"
+              className="bg-black hover:bg-gray-800 text-white font-medium py-2 px-6 rounded focus:outline-none"
+              disabled={loading}
+            >
+              {loading ? '保存中...' : '保存'}
+            </button>
+          </div>
+        </form>
+      </div>
 
-        {/* Buttons */}
-        <div className="flex justify-between">
-          <button
-            type="button"
-            className="border border-gray-300 bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-6 rounded focus:outline-none"
-            onClick={handleCancel}
-          >
-            取消
-          </button>
-          <button
-            type="submit"
-            className="bg-black hover:bg-gray-800 text-white font-medium py-2 px-6 rounded focus:outline-none"
-            disabled={loading}
-          >
-            {loading ? '保存中...' : '保存'}
-          </button>
-        </div>
-      </form>
+      {/* 右侧大图 */}
+      <div className="flex-1 flex items-center justify-center">
+        <img 
+          src={settingsSvg} 
+          alt="设置装饰图" 
+          className="w-full max-w-lg h-auto"
+        />
+      </div>
     </div>
   );
 };
