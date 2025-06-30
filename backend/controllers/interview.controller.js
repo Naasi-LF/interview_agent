@@ -62,8 +62,13 @@ exports.getInterviews = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
     const search = req.query.search || '';
+    const now = new Date(); // 获取当前时间
 
-    let query = { isPublic: true };
+    // 基础查询条件：公开且未过期（结束时间大于当前时间）
+    let query = { 
+      isPublic: true,
+      endTime: { $gt: now } // 只显示未过期的面试
+    };
     
     // 如果有搜索关键词，添加到查询条件
     if (search) {

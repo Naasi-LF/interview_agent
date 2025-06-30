@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth.routes');
 const userRoutes = require('./routes/user.routes');
 const interviewRoutes = require('./routes/interview.routes');
+const attemptRoutes = require('./routes/attempt.routes');
 
 // Load environment variables
 dotenv.config();
@@ -33,6 +34,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/interviews', interviewRoutes);
+app.use('/api', attemptRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

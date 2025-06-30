@@ -8,6 +8,11 @@ import AdminDashboard from './pages/AdminDashboard';
 import Settings from './pages/Settings';
 import CreateInterview from './pages/CreateInterview';
 import Profile from './pages/Profile';
+import InterviewList from './pages/InterviewList';
+import InterviewDetail from './pages/InterviewDetail';
+import InterviewSession from './pages/InterviewSession';
+import InterviewReport from './pages/InterviewReport';
+import MyAttempts from './pages/MyAttempts';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // 自定义路由守卫组件
@@ -34,22 +39,30 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           
-          {/* 受保护的路由 */}
-          <Route path="/dashboard" element={
+          {/* 受保护的仪表盘路由 */}
+          <Route path="/" element={
             <RequireAuth>
               <Dashboard />
             </RequireAuth>
           }>
-            <Route index element={<div className="w-full">
-              <h2 className="text-3xl font-heiti mb-6">仪表盘</h2>
-              <div className="bg-gray-50 rounded-lg p-10 flex items-center justify-center h-[600px]">
-                <p className="text-xl text-gray-500 font-kaiti">仪表盘内容将在未来更新中实现</p>
-              </div>
-            </div>} />
+            {/* 仪表盘首页 */}
+            <Route index element={<MyAttempts />} />
             <Route path="profile" element={<Profile />} />
             <Route path="create-interview" element={<CreateInterview />} />
             <Route path="settings" element={<Settings />} />
+            
+            {/* 面试相关路由 */}
+            <Route path="interviews" element={<InterviewList />} />
+            <Route path="interviews/:id" element={<InterviewDetail />} />
+            <Route path="attempts/:id" element={<InterviewReport />} />
           </Route>
+          
+          {/* 面试进行页面（全屏模式，不需要导航栏） */}
+          <Route path="/interviews/:id/session" element={
+            <RequireAuth>
+              <InterviewSession />
+            </RequireAuth>
+          } />
           
           <Route path="/admin" element={
             <RequireAuth>
@@ -57,8 +70,8 @@ function App() {
             </RequireAuth>
           } />
           
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="/dashboard" element={<Navigate to="/" />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </AuthProvider>
     </Router>

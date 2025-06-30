@@ -68,4 +68,70 @@ export const userService = {
   },
 };
 
+// Interview services
+export const interviewService = {
+  // 获取所有公开面试列表
+  getInterviews: async (page = 1, limit = 10, search = '') => {
+    return await api.get(`/interviews?page=${page}&limit=${limit}&search=${search}`);
+  },
+  
+  // 获取单个面试详情
+  getInterviewById: async (id) => {
+    return await api.get(`/interviews/${id}`);
+  },
+  
+  // 创建新面试
+  createInterview: async (interviewData) => {
+    return await api.post('/interviews', interviewData);
+  },
+  
+  // 更新面试
+  updateInterview: async (id, interviewData) => {
+    return await api.put(`/interviews/${id}`, interviewData);
+  },
+  
+  // 删除面试
+  deleteInterview: async (id) => {
+    return await api.delete(`/interviews/${id}`);
+  },
+  
+  // 获取我创建的面试列表
+  getMyInterviews: async (page = 1, limit = 10) => {
+    return await api.get(`/interviews/my/interviews?page=${page}&limit=${limit}`);
+  },
+  
+  // 获取面试数据看板
+  getInterviewDashboard: async (id) => {
+    return await api.get(`/interviews/${id}/dashboard`);
+  },
+};
+
+// Attempt services
+export const attemptService = {
+  // 开始一次新的面试尝试
+  startAttempt: async (interviewId) => {
+    return await api.post(`/interviews/${interviewId}/attempts`);
+  },
+  
+  // 提交回答并获取下一个问题
+  submitAnswer: async (attemptId, question, answer) => {
+    return await api.post(`/attempts/${attemptId}/answer`, { question, answer });
+  },
+  
+  // 获取用户的所有面试尝试记录
+  getUserAttempts: async (page = 1, limit = 10) => {
+    return await api.get(`/users/me/attempts?page=${page}&limit=${limit}`);
+  },
+  
+  // 获取单个面试尝试记录详情
+  getAttemptById: async (id) => {
+    return await api.get(`/attempts/${id}`);
+  },
+  
+  // 导出面试报告为PDF
+  exportReportPdf: async (id) => {
+    return await api.get(`/attempts/${id}/export/pdf`);
+  },
+};
+
 export default api;
