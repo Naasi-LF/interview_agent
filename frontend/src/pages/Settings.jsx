@@ -78,8 +78,8 @@ const Settings = () => {
     reader.readAsDataURL(file);
   };
   
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // --- MODIFIED FUNCTION START ---
+  const handleSave = async () => {
     setError('');
     setSuccess('');
     setLoading(true);
@@ -87,7 +87,7 @@ const Settings = () => {
     // Validate password match if password is provided
     if (formData.password && formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
-      setLoading(false);
+      setLoading(false); // Stop loading immediately on validation error
       return;
     }
     
@@ -106,16 +106,30 @@ const Settings = () => {
       // Only update if there are changes
       if (Object.keys(updateData).length > 0) {
         await updateUser(updateData);
-        setSuccess('Profile updated successfully');
+        
+        // Use setTimeout to delay the success feedback by 1 second
+        setTimeout(() => {
+          setSuccess('Profile updated successfully');
+          // Clear password fields after successful update
+          setFormData(prev => ({
+            ...prev,
+            password: '',
+            confirmPassword: ''
+          }));
+          setLoading(false); // Stop loading after the delay
+        }, 100);
+
       } else {
         setSuccess('No changes to save');
+        setLoading(false); // If no changes, stop loading immediately
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update profile');
-    } finally {
-      setLoading(false);
+      setLoading(false); // On error, stop loading immediately
     }
+    // We removed the 'finally' block because we now handle setLoading(false) in each specific case (success with delay, no changes, and error).
   };
+  // --- MODIFIED FUNCTION END ---
   
   const handleLogout = async () => {
     try {
@@ -139,7 +153,7 @@ const Settings = () => {
         {error && <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>}
         {success && <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">{success}</div>}
         
-        <form onSubmit={handleSubmit}>
+        <div>
           {/* Avatar */}
           <div className="mb-8 flex justify-center">
             <div className="relative">
@@ -265,14 +279,15 @@ const Settings = () => {
               取消
             </button>
             <button
-              type="submit"
+              type="button"
               className="bg-black hover:bg-gray-800 text-white font-medium py-2 px-6 rounded focus:outline-none"
               disabled={loading}
+              onClick={handleSave}
             >
               {loading ? '保存中...' : '保存'}
             </button>
           </div>
-        </form>
+        </div>
       </div>
 
       {/* 右侧大图 */}

@@ -3,22 +3,30 @@ import { authService, userService } from '../services/api';
 
 const AuthContext = createContext();
 
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // 这个loading主要用于整个应用的初始加载
+  const [loading, setLoading] = useState(true); 
+  // 这个error主要用于登录/注册过程中的错误
   const [error, setError] = useState(null);
 
+  // 组件首次挂载时，检查本地存储中是否已有用户信息
   useEffect(() => {
-    // Check if user is already logged in
+    // 假设authService可以从localStorage或cookie中同步获取用户信息
     const user = authService.getCurrentUser();
-    setCurrentUser(user);
-    setLoading(false);
+    if (user) {
+      setCurrentUser(user);
+    }
+    setLoading(false); // 检查完毕，结束初始加载状态
   }, []);
 
-  // Register new user
+  // 注册新用户
   const register = async (username, password, nickname) => {
     try {
-      setLoading(true);
       setError(null);
       const data = await authService.register({ username, password, nickname });
       setCurrentUser(data.user);
@@ -26,15 +34,12 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       setError(error.response?.data?.message || 'Registration failed');
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Login user
+  // 登录用户
   const login = async (username, password) => {
     try {
-      setLoading(true);
       setError(null);
       const data = await authService.login({ username, password });
       setCurrentUser(data.user);
@@ -42,33 +47,32 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       setError(error.response?.data?.message || 'Login failed');
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
-  // Logout user
+  // 登出用户
   const logout = () => {
     authService.logout();
     setCurrentUser(null);
   };
   
-  // Update user profile
+  // --- 关键改动 1: 简化 updateUser 函数 ---
+  // 这个函数现在只负责调用API并返回结果。
+  // 它不再管理 loading 状态或直接更新 currentUser。
+  // 错误会向上抛出，由调用它的组件（如Settings.js）去处理。
   const updateUser = async (userData) => {
     try {
-      setLoading(true);
-      setError(null);
       const data = await userService.updateProfile(userData);
-      setCurrentUser(data.user);
-      return data;
+      // 只返回更新后的 user 对象
+      return data.user; 
     } catch (error) {
-      setError(error.response?.data?.message || 'Profile update failed');
+      // 将错误抛出，以便 Settings 组件可以捕获并显示它
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
+  // --- 关键改动 2: 在 value 对象中导出 setCurrentUser ---
+  // 这样其他组件就可以通过 useAuth() 来获取并使用它。
   const value = {
     currentUser,
     loading,
@@ -76,14 +80,16 @@ export const AuthProvider = ({ children }) => {
     register,
     login,
     logout,
-    updateUser
+    updateUser,
+    setCurrentUser // <-- 导出 state 更新函数
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
-
-export const useAuth = () => {
-  return useContext(AuthContext);
+  return (
+    <AuthContext.Provider value={value}>
+      {/* 这是一个好习惯：确保在初始用户信息加载完成前，不渲染依赖用户信息的子组件 */}
+      {!loading && children}
+    </AuthContext.Provider>
+  );
 };
 
 export default AuthContext;
