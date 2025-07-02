@@ -1,15 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { interviewService } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import { format } from 'date-fns';
+import { CalendarIcon, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import { Switch } from "@/components/ui/switch";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const InterviewDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [interview, setInterview] = useState(null);
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('info'); // 'info' or 'leaderboard'
+  
+  // 编辑模态框相关状态
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    endTime: new Date(),
+    isPublic: true
+  });
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState('');
 
   useEffect(() => {
     fetchInterviewData();
@@ -21,6 +42,12 @@ const InterviewDetail = () => {
       const interviewResponse = await interviewService.getInterviewById(id);
       setInterview(interviewResponse.data);
       
+      // 初始化编辑表单数据
+      setEditFormData({
+        endTime: new Date(interviewResponse.data.endTime),
+        isPublic: interviewResponse.data.isPublic
+      });
+      
       // 获取面试数据看板
       const dashboardResponse = await interviewService.getInterviewDashboard(id);
       setDashboard(dashboardResponse.data);
@@ -31,6 +58,55 @@ const InterviewDetail = () => {
       setLoading(false);
       console.error('Error fetching interview details:', err);
     }
+  };
+  
+  // 处理编辑表单变化
+  const handleEditFormChange = (field, value) => {
+    setEditFormData({
+      ...editFormData,
+      [field]: value
+    });
+  };
+  
+  // 打开编辑模态框
+  const openEditModal = () => {
+    setEditError('');
+    setShowEditModal(true);
+  };
+  
+  // 关闭编辑模态框
+  const closeEditModal = () => {
+    setShowEditModal(false);
+  };
+  
+  // 提交编辑表单
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setEditLoading(true);
+    setEditError('');
+    
+    try {
+      // 只更新允许的字段
+      const updateData = {
+        endTime: editFormData.endTime,
+        isPublic: editFormData.isPublic
+      };
+      
+      await interviewService.updateInterview(id, updateData);
+      await fetchInterviewData(); // 重新获取面试数据
+      setShowEditModal(false);
+    } catch (err) {
+      setEditError('更新面试失败，请稍后再试');
+      console.error('Error updating interview:', err);
+    } finally {
+      setEditLoading(false);
+    }
+  };
+  
+  // 检查当前用户是否是面试创建者
+  const isCreator = () => {
+    if (!interview || !currentUser) return false;
+    return interview.creatorId._id === currentUser._id;
   };
 
   const startInterview = () => {
@@ -56,6 +132,14 @@ const InterviewDetail = () => {
     const startTime = new Date(interview.startTime);
     const endTime = new Date(interview.endTime);
     return now >= startTime && now <= endTime && interview.status === 'active';
+  };
+  
+  // 判断面试是否已过期
+  const isInterviewExpired = () => {
+    if (!interview) return false;
+    const now = new Date();
+    const endTime = new Date(interview.endTime);
+    return now > endTime && interview.status === 'active';
   };
 
   // 渲染排行榜
@@ -179,7 +263,7 @@ const InterviewDetail = () => {
     return (
       <div className="bg-zinc-50 border border-zinc-200 text-zinc-800 px-6 py-4 rounded-lg relative flex items-center" role="alert">
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
         <span className="block sm:inline">{error || '面试不存在'}</span>
       </div>
@@ -187,7 +271,89 @@ const InterviewDetail = () => {
   }
 
   return (
-    <div className="container mx-auto">
+    <div className="py-8 min-h-screen bg-zinc-50">
+      {/* 编辑模态框 */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">编辑面试</h2>
+              <button 
+                onClick={closeEditModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            
+            {editError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                {editError}
+              </div>
+            )}
+            
+            <form onSubmit={handleEditSubmit}>
+              <div className="space-y-4">
+                {/* 截止时间选择器 */}
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium">截止时间</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className={cn(
+                          "w-full flex items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                        )}
+                      >
+                        {editFormData.endTime ? format(editFormData.endTime, "yyyy-MM-dd") : "选择日期"}
+                        <CalendarIcon className="h-4 w-4 opacity-50" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={editFormData.endTime}
+                        onSelect={(date) => handleEditFormChange('endTime', date)}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                {/* 是否公开 */}
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">是否公开面试？(全局可见)</label>
+                  <Switch
+                    checked={editFormData.isPublic}
+                    onCheckedChange={(checked) => handleEditFormChange('isPublic', checked)}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-2 mt-6">
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  disabled={editLoading}
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 disabled:opacity-50"
+                  disabled={editLoading}
+                >
+                  {editLoading ? '保存中...' : '保存'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      
+      <div className="container mx-auto">
       <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden">
         {/* 面试标题和基本信息 */}
         <div className="p-6 flex justify-between items-center border-b border-zinc-200">
@@ -208,19 +374,39 @@ const InterviewDetail = () => {
                 </svg>
                 <span>参与人数: {interview.participantCount || 0}</span>
               </div>
-              <span className={`px-2 py-1 rounded-full text-xs ${interview.status === 'active' ? 'bg-black text-white' : 'bg-zinc-100 text-zinc-800 border border-zinc-200'}`}>
-                {interview.status === 'active' ? '进行中' : interview.status === 'draft' ? '草稿' : '已结束'}
+              <span className={`px-2 py-1 rounded-full text-xs ${isInterviewExpired() ? 'bg-red-100 text-red-800 border border-red-200' : interview.status === 'active' ? 'bg-black text-white' : 'bg-zinc-100 text-zinc-800 border border-zinc-200'}`}>
+                {isInterviewExpired() ? '已过期' : interview.status === 'active' ? '进行中' : interview.status === 'draft' ? '草稿' : '已结束'}
               </span>
+              {interview.isPublic && (
+                <span className="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800 border border-green-200">
+                  公开
+                </span>
+              )}
+              {!interview.isPublic && (
+                <span className="px-2 py-1 rounded-full text-xs bg-gray-100 text-gray-800 border border-gray-200">
+                  私有
+                </span>
+              )}
             </div>
           </div>
-          {isInterviewActive() && (
-            <button
-              onClick={startInterview}
-              className="bg-black hover:bg-zinc-800 text-white px-6 py-2 rounded-md transition-colors"
-            >
-              开始面试
-            </button>
-          )}
+          <div className="flex gap-2">
+            {isInterviewActive() && !isInterviewExpired() && (
+              <button
+                onClick={startInterview}
+                className="bg-black hover:bg-zinc-800 text-white px-6 py-2 rounded-md transition-colors"
+              >
+                开始面试
+              </button>
+            )}
+            {isCreator() && (
+              <button
+                onClick={openEditModal}
+                className="bg-white border border-black text-black hover:bg-gray-100 px-6 py-2 rounded-md transition-colors"
+              >
+                编辑
+              </button>
+            )}
+          </div>
         </div>
         
         {/* 选项卡导航 */}
@@ -324,6 +510,7 @@ const InterviewDetail = () => {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 };

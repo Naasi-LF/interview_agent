@@ -120,6 +120,7 @@ const MyAttempts = () => {
   // 渲染创建的面试卡片
   const renderInterviewCard = (interview) => {
     const isActive = interview.status === 'active';
+    const isExpired = isActive && new Date() > new Date(interview.endTime);
     
     return (
       <div key={interview._id} className="bg-white border border-zinc-200 rounded-lg overflow-hidden hover:shadow-sm transition-shadow">
@@ -128,9 +129,11 @@ const MyAttempts = () => {
           <div className="flex justify-between items-center text-sm text-zinc-500 mb-4">
             <span>创建时间: {new Date(interview.createdAt).toLocaleDateString('zh-CN')}</span>
             <span className={`px-2 py-1 rounded-full text-xs ${
-              isActive ? 'bg-black text-white' : 'bg-zinc-100 text-zinc-800 border border-zinc-200'
+              isExpired ? 'bg-red-100 text-red-800 border border-red-200' : 
+              isActive ? 'bg-black text-white' : 
+              'bg-zinc-100 text-zinc-800 border border-zinc-200'
             }`}>
-              {isActive ? '活跃' : '已关闭'}
+              {isExpired ? '已过期' : isActive ? '活跃' : '已关闭'}
             </span>
           </div>
           
@@ -157,7 +160,7 @@ const MyAttempts = () => {
               查看详情
             </Link>
             <Link
-              to={`/create-interview?edit=${interview._id}`}
+              to={`/interviews/${interview._id}`}
               className="px-4 py-2 bg-black text-white rounded-md hover:bg-zinc-800 transition-colors"
             >
               编辑
