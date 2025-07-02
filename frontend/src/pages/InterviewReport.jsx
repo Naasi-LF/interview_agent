@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { attemptService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -135,6 +135,7 @@ const InterviewReport = () => {
   const [error, setError] = useState('');
   const [showFullQA, setShowFullQA] = useState(false);
   const [refreshCount, setRefreshCount] = useState(0);
+  const [exportingPdf, setExportingPdf] = useState(false);
 
   useEffect(() => {
     fetchAttemptData();
@@ -163,16 +164,92 @@ const InterviewReport = () => {
     }
   };
 
-  const handleExportPdf = async () => {
+  const reportContentRef = useRef(null);
+
+  // 生成Markdown格式的报告
+  const generateMarkdownReport = () => {
+    if (!attempt || !attempt.result) {
+      return '';
+    }
+    
+    const { result, interviewId, userId } = attempt;
+    const { overallScore } = result;
+    const competencyDimensions = interviewId.settings.competencyDimensions || [];
+    const dimensionalScores = result.dimensionalScores || {};
+    const qaLog = attempt.qaLog || [];
+    
+    // 基本信息
+    let markdown = `# 面试报告: ${interviewId.title}\n\n`;
+    markdown += `- **参与者**: ${userId.nickname || userId.username}\n`;
+    markdown += `- **完成时间**: ${new Date(result.completedAt).toLocaleString('zh-CN')}\n`;
+    markdown += `- **总分**: ${overallScore.toFixed(1)}\n\n`;
+    
+    // 生成雷达图的mermaid代码
+    markdown += `## 能力维度评分\n\n`;
+    markdown += '```mermaid\npie\n';
+    
+    // 添加各维度得分
+    if (competencyDimensions && competencyDimensions.length > 0) {
+      competencyDimensions.forEach(dimension => {
+        const score = dimensionalScores[dimension] || 0;
+        markdown += `    "${dimension}: ${score.toFixed(1)}" : ${score}\n`;
+      });
+    }
+    markdown += '```\n\n';
+    
+    // 问题与回答
+    markdown += `## 问题与回答\n\n`;
+    if (qaLog && qaLog.length > 0) {
+      qaLog.forEach((qa, index) => {
+        markdown += `### 问题 ${index + 1}\n\n`;
+        markdown += `**问题**: ${qa.question}\n\n`;
+        markdown += `**回答**: ${qa.answer}\n\n`;
+        if (qa.score !== undefined) {
+          markdown += `**评分**: ${qa.score.toFixed(1)}\n\n`;
+        }
+        if (qa.feedback) {
+          markdown += `**反馈**: ${qa.feedback}\n\n`;
+        }
+      });
+    }
+    
+    // 总体评价
+    if (result.aiComment) {
+      markdown += `## 总体评价\n\n${result.aiComment}\n`;
+    }
+    
+    return markdown;
+  };
+
+  // 导出Markdown文件
+  const handleExportMarkdown = async () => {
     try {
-      const response = await attemptService.exportReportPdf(id);
-      if (response.data.canExport) {
-        // 在实际应用中，这里应该触发PDF下载
-        alert('PDF导出功能将在未来版本中实现');
-      }
+      setExportingPdf(true); // 复用现有状态变量
+      
+      // 生成Markdown内容
+      const markdownContent = generateMarkdownReport();
+      
+      // 创建Blob对象
+      const blob = new Blob([markdownContent], { type: 'text/markdown' });
+      
+      // 创建下载链接
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `面试报告_${attempt.interviewId.title}_${new Date().toLocaleDateString('zh-CN')}.md`;
+      
+      // 触发下载
+      document.body.appendChild(link);
+      link.click();
+      
+      // 清理
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      setExportingPdf(false);
     } catch (err) {
-      console.error('Error exporting PDF:', err);
-      alert('导出PDF失败');
+      console.error('Error exporting markdown:', err);
+      alert('导出报告失败，请稍后再试');
+      setExportingPdf(false);
     }
   };
 
@@ -226,24 +303,43 @@ const InterviewReport = () => {
                   </svg>
                   <span>完成时间: {new Date(attempt.result?.completedAt).toLocaleString('zh-CN')}</span>
                 </div>
+                <div className="flex items-center mr-4">
+                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                  </svg>
+                  <span>问题数量: {attempt.qaLog ? attempt.qaLog.length : 0} 题</span>
+                </div>
               </div>
             </div>
-            {isCreator() && (
-              <button
-                onClick={handleExportPdf}
-                className="bg-black hover:bg-zinc-800 text-white px-4 py-2 rounded-md transition flex items-center"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                导出PDF
-              </button>
-            )}
+            <button
+              onClick={handleExportMarkdown}
+              disabled={exportingPdf}
+              className={`px-4 py-2 rounded-md transition flex items-center ${exportingPdf 
+                ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed' 
+                : 'bg-zinc-200 hover:bg-zinc-300 text-zinc-700'}`}
+            >
+              {exportingPdf ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-zinc-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  生成中...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                  </svg>
+                  导出报告
+                </>
+              )}
+            </button>
           </div>
         </div>
         
         {/* 报告内容 */}
-        <div className="p-6">
+        <div className="p-6" ref={reportContentRef}>
           {!isReportGenerated ? (
             <div className="text-center py-10">
               <div className="animate-pulse flex flex-col items-center">

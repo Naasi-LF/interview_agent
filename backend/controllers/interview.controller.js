@@ -70,9 +70,12 @@ exports.getInterviews = async (req, res, next) => {
       endTime: { $gt: now } // 只显示未过期的面试
     };
     
-    // 如果有搜索关键词，添加到查询条件
+    // 如果有搜索关键词，使用模糊搜索
     if (search) {
-      query.$text = { $search: search };
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
 
     const interviews = await Interview.find(query)
@@ -166,16 +169,34 @@ exports.getMyInterviews = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
+    // 获取面试列表
     const interviews = await Interview.find({ creatorId: req.user.id })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
+    // 获取总数
     const total = await Interview.countDocuments({ creatorId: req.user.id });
     const totalPages = Math.ceil(total / limit);
 
+    // 使用Promise.all并行处理每个面试的数据增强
+    const enhancedInterviews = await Promise.all(interviews.map(async (interview) => {
+      // 转换为普通对象
+      const interviewObj = interview.toObject();
+      
+      // 添加问题数量
+      interviewObj.questionCount = interview.settings?.questionPool?.length || 0;
+      
+      // 查询参与人数
+      const Attempt = require('../models/attempt.model');
+      const attemptCount = await Attempt.countDocuments({ interviewId: interview._id });
+      interviewObj.attemptCount = attemptCount;
+      
+      return interviewObj;
+    }));
+
     res.json({
-      interviews,
+      interviews: enhancedInterviews,
       totalPages,
       currentPage: page,
       total
