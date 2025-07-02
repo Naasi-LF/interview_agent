@@ -207,11 +207,12 @@ exports.getAttemptById = async (req, res, next) => {
       return next(createError(404, '面试尝试记录不存在'));
     }
 
-    // 检查访问权限（仅创建者或参与者可查看）
+    // 检查访问权限（创建者、参与者或管理员可查看）
     const isParticipant = attempt.userId._id.toString() === userId;
     const isCreator = attempt.interviewId.creatorId._id.toString() === userId;
+    const isAdmin = req.user.role === 'admin';
 
-    if (!isParticipant && !isCreator) {
+    if (!isParticipant && !isCreator && !isAdmin) {
       return next(createError(403, '您无权查看此面试尝试记录'));
     }
 

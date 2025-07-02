@@ -5,6 +5,9 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminUsers from './pages/AdminUsers';
+import AdminInterviews from './pages/AdminInterviews';
+import AdminAttempts from './pages/AdminAttempts';
 import Settings from './pages/Settings';
 import CreateInterview from './pages/CreateInterview';
 import Profile from './pages/Profile';
@@ -13,10 +16,11 @@ import InterviewDetail from './pages/InterviewDetail';
 import InterviewSession from './pages/InterviewSession';
 import InterviewReport from './pages/InterviewReport';
 import MyAttempts from './pages/MyAttempts';
+import TestAuth from './pages/TestAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // 自定义路由守卫组件
-const RequireAuth = ({ children }) => {
+const RequireAuth = ({ children, requireAdmin = false }) => {
   const { currentUser, loading } = useAuth();
   
   if (loading) {
@@ -25,6 +29,11 @@ const RequireAuth = ({ children }) => {
   
   if (!currentUser) {
     return <Navigate to="/login" replace />;
+  }
+  
+  // 检查是否需要管理员权限
+  if (requireAdmin && currentUser.role !== 'admin') {
+    return <Navigate to="/" replace />;
   }
   
   return children;
@@ -64,11 +73,26 @@ function App() {
             </RequireAuth>
           } />
           
-          <Route path="/admin" element={
+          {/* 测试身份验证页面 */}
+          <Route path="/test-auth" element={
             <RequireAuth>
-              <AdminDashboard />
+              <TestAuth />
             </RequireAuth>
           } />
+          
+          {/* 管理员路由 */}
+          <Route path="/admin" element={
+            <RequireAuth requireAdmin={true}>
+              <AdminDashboard />
+            </RequireAuth>
+          }>
+            <Route index element={<></>} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="interviews" element={<AdminInterviews />} />
+            <Route path="interviews/:id" element={<InterviewDetail />} />
+            <Route path="attempts" element={<AdminAttempts />} />
+            <Route path="attempts/:id" element={<InterviewReport />} />
+          </Route>
           
           <Route path="/dashboard" element={<Navigate to="/" />} />
           <Route path="*" element={<Navigate to="/" />} />

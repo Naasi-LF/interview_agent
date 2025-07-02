@@ -134,4 +134,46 @@ export const attemptService = {
   },
 };
 
+// Admin services
+export const adminService = {
+  // 获取平台统计数据
+  getStats: async () => {
+    return await api.get('/admin/stats');
+  },
+  
+  // 获取所有用户
+  getUsers: async (page = 1, limit = 10, username = '', role = '') => {
+    let url = `/admin/users?page=${page}&limit=${limit}`;
+    if (username) url += `&username=${username}`;
+    if (role) url += `&role=${role}`;
+    return await api.get(url);
+  },
+  
+  // 重置用户密码
+  resetUserPassword: async (userId, newPassword) => {
+    return await api.put(`/admin/users/${userId}/reset-password`, { newPassword });
+  },
+  
+  // 获取所有面试
+  getInterviews: async (page = 1, limit = 10, title = '', status = '') => {
+    let url = `/admin/interviews?page=${page}&limit=${limit}`;
+    if (title) url += `&title=${title}`;
+    if (status) url += `&status=${status}`;
+    return await api.get(url);
+  },
+  
+  // 删除面试
+  deleteInterview: async (id) => {
+    return await api.delete(`/admin/interviews/${id}`);
+  },
+  
+  // 获取所有面试尝试
+  getAttempts: async (page = 1, limit = 10, username = '', status = '') => {
+    let url = `/admin/attempts?page=${page}&limit=${limit}`;
+    if (username) url += `&username=${username}`;
+    if (status && status !== 'all') url += `&status=${status}`;
+    return await api.get(url);
+  },
+};
+
 export default api;
