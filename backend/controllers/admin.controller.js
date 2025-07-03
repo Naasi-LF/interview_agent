@@ -242,18 +242,14 @@ exports.resetUserPassword = async (req, res, next) => {
     }
     
     // 生成随机密码
-    const randomPassword = Math.random().toString(36).slice(-8);
+    const newPassword = req.body.newPassword || Math.random().toString(36).slice(-8);
     
-    // 加密新密码
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(randomPassword, salt);
-    
-    // 更新用户密码
-    await User.findByIdAndUpdate(userId, { password: hashedPassword });
+    // 更新用户密码 - 使用 $set 操作符，让 pre('findOneAndUpdate') 钩子处理密码加密
+    await User.findByIdAndUpdate(userId, { $set: { password: newPassword } });
     
     res.json({
       message: '密码重置成功',
-      newPassword: randomPassword
+      newPassword: newPassword
     });
   } catch (error) {
     next(error);
